@@ -12,7 +12,7 @@
 
 #define TICK_NUM 100
 volatile size_t num=0;
-
+void  (*recover) () = (void (*)())(0x8020000a+62);
 static void print_ticks() {
     cprintf("%d ticks\n", TICK_NUM);
 #ifdef DEBUG_GRADE
@@ -101,17 +101,27 @@ void interrupt_handler(struct trapframe *tf) {
             cprintf("User software interrupt\n");
             break;
         case IRQ_S_TIMER:
+        extern void __trapret(void);
             // "All bits besides SSIP and USIP in the sip register are
             // read-only." -- privileged spec1.9.1, 4.1.4, p59
             // In fact, Call sbi_set_timer will clear STIP, or you can clear it
             // directly.
             // cprintf("Supervisor timer interrupt\n");
-             /* LAB1 EXERCISE2   YOUR CODE :  */
+             /* LAB1 EXERCISE2   YOUR CODE :2212338  */
             /*(1)设置下次时钟中断- clock_set_next_event()
              *(2)计数器（ticks）加一
              *(3)当计数器加到100的时候，我们会输出一个`100ticks`表示我们触发了100次时钟中断，同时打印次数（num）加一
             * (4)判断打印次数，当打印次数为10时，调用<sbi.h>中的关机函数关机
             */
+           clock_set_next_event();
+           ticks++;
+           if(ticks%100==0)
+           {
+            print_ticks();
+           }
+            if(ticks/100==10){
+                sbi_shutdown();
+            }
             break;
         case IRQ_H_TIMER:
             cprintf("Hypervisor software interrupt\n");
@@ -137,49 +147,66 @@ void interrupt_handler(struct trapframe *tf) {
     }
 }
 
+#include <stdio.h>
+
 void exception_handler(struct trapframe *tf) {
     switch (tf->cause) {
         case CAUSE_MISALIGNED_FETCH:
+            cprintf("Exception type: Misaligned fetch\n");
+            cprintf("Faulty instruction address: 0x%x\n", tf->epc);
             break;
         case CAUSE_FAULT_FETCH:
+            cprintf("Exception type: Fault fetch\n");
+            cprintf("Faulty instruction address: 0x%x\n", tf->epc);
             break;
         case CAUSE_ILLEGAL_INSTRUCTION:
-             // 非法指令异常处理
-             /* LAB1 CHALLENGE3   YOUR CODE :  */
-            /*(1)输出指令异常类型（ Illegal instruction）
-             *(2)输出异常指令地址
-             *(3)更新 tf->epc寄存器
-            */
+            cprintf("Exception type: Illegal instruction\n");
+            cprintf("Illegal instruction caught at 0x%x\n", tf->epc);
+            tf->epc += 4; // 更新epc
             break;
         case CAUSE_BREAKPOINT:
-            //断点异常处理
-            /* LAB1 CHALLLENGE3   YOUR CODE :  */
-            /*(1)输出指令异常类型（ breakpoint）
-             *(2)输出异常指令地址
-             *(3)更新 tf->epc寄存器
-            */
+            cprintf("Exception type: Breakpoint\n");
+            cprintf("ebreak caught at 0x%x\n", tf->epc);
+            tf->epc += 4; // 更新epc
             break;
         case CAUSE_MISALIGNED_LOAD:
+            cprintf("Exception type: Misaligned load\n");
+            cprintf("Faulty address: 0x%x\n", tf->epc);
             break;
         case CAUSE_FAULT_LOAD:
+            cprintf("Exception type: Fault load\n");
+            cprintf("Faulty address: 0x%x\n", tf->epc);
             break;
         case CAUSE_MISALIGNED_STORE:
+            cprintf("Exception type: Misaligned store\n");
+            cprintf("Faulty address: 0x%x\n", tf->epc);
             break;
         case CAUSE_FAULT_STORE:
+            cprintf("Exception type: Fault store\n");
+            cprintf("Faulty address: 0x%x\n", tf->epc);
             break;
         case CAUSE_USER_ECALL:
+            cprintf("Exception type: User ecall\n");
+            cprintf("User call at: 0x%x\n", tf->epc);
             break;
         case CAUSE_SUPERVISOR_ECALL:
+            cprintf("Exception type: Supervisor ecall\n");
+            cprintf("Supervisor call at: 0x%x\n", tf->epc);
             break;
         case CAUSE_HYPERVISOR_ECALL:
+            cprintf("Exception type: Hypervisor ecall\n");
+            cprintf("Hypervisor call at: 0x%x\n", tf->epc);
             break;
         case CAUSE_MACHINE_ECALL:
+            cprintf("Exception type: Machine ecall\n");
+            cprintf("Machine call at: 0x%x\n", tf->epc);
             break;
         default:
             print_trapframe(tf);
             break;
     }
 }
+
 
 /* trap_dispatch - dispatch based on what type of trap occurred */
 static inline void trap_dispatch(struct trapframe *tf) {
