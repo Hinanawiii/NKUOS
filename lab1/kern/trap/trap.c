@@ -101,7 +101,7 @@ void interrupt_handler(struct trapframe *tf) {
             cprintf("User software interrupt\n");
             break;
         case IRQ_S_TIMER:
-        extern void __trapret(void);
+
             // "All bits besides SSIP and USIP in the sip register are
             // read-only." -- privileged spec1.9.1, 4.1.4, p59
             // In fact, Call sbi_set_timer will clear STIP, or you can clear it
