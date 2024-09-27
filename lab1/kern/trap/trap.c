@@ -180,7 +180,7 @@ void exception_handler(struct trapframe *tf) {
              */
             cprintf("Exception type: Breakpoint\n");
             cprintf("ebreak caught at 0x%x\n", tf->epc);
-            tf->epc += 4; // 更新epc
+            tf->epc += 2; // 更新epc
             break;
         case CAUSE_MISALIGNED_LOAD:
             cprintf("Exception type: Misaligned load\n");
