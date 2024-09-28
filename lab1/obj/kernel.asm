@@ -63,6 +63,9 @@ int kern_init(void) {
 
     intr_enable();  // enable irq interrupt
     8020004a:	136000ef          	jal	ra,80200180 <intr_enable>
+    /*Lab1 2211459
+    加入触发异常中断
+    */
     asm volatile (
     8020004e:	30200073          	mret
         "mret"
@@ -600,202 +603,205 @@ void interrupt_handler(struct trapframe *tf) {
     80200444:	00001517          	auipc	a0,0x1
     80200448:	be450513          	addi	a0,a0,-1052 # 80201028 <etext+0x514>
     8020044c:	c25ff0ef          	jal	ra,80200070 <cprintf>
-                if(++num == 10)
-    80200450:	00004717          	auipc	a4,0x4
-    80200454:	bc870713          	addi	a4,a4,-1080 # 80204018 <num>
-    80200458:	631c                	ld	a5,0(a4)
+                num++;
+    80200450:	00004797          	auipc	a5,0x4
+    80200454:	bc878793          	addi	a5,a5,-1080 # 80204018 <num>
+    80200458:	6398                	ld	a4,0(a5)
+                if(num == 10)
     8020045a:	46a9                	li	a3,10
-    8020045c:	0785                	addi	a5,a5,1
-    8020045e:	e31c                	sd	a5,0(a4)
-    80200460:	fcd797e3          	bne	a5,a3,8020042e <interrupt_handler+0x6a>
+                num++;
+    8020045c:	0705                	addi	a4,a4,1
+    8020045e:	e398                	sd	a4,0(a5)
+                if(num == 10)
+    80200460:	639c                	ld	a5,0(a5)
+    80200462:	fcd796e3          	bne	a5,a3,8020042e <interrupt_handler+0x6a>
 }
-    80200464:	60a2                	ld	ra,8(sp)
-    80200466:	0141                	addi	sp,sp,16
+    80200466:	60a2                	ld	ra,8(sp)
+    80200468:	0141                	addi	sp,sp,16
                     sbi_shutdown();
-    80200468:	a595                	j	80200acc <sbi_shutdown>
+    8020046a:	a58d                	j	80200acc <sbi_shutdown>
 
-000000008020046a <exception_handler>:
+000000008020046c <exception_handler>:
 
 #include <stdio.h>
 
 void exception_handler(struct trapframe *tf) {
     switch (tf->cause) {
-    8020046a:	11853783          	ld	a5,280(a0)
-    8020046e:	472d                	li	a4,11
-    80200470:	16f76a63          	bltu	a4,a5,802005e4 <exception_handler+0x17a>
-    80200474:	00001717          	auipc	a4,0x1
-    80200478:	eb470713          	addi	a4,a4,-332 # 80201328 <etext+0x814>
-    8020047c:	078a                	slli	a5,a5,0x2
-    8020047e:	97ba                	add	a5,a5,a4
-    80200480:	439c                	lw	a5,0(a5)
+    8020046c:	11853783          	ld	a5,280(a0)
+    80200470:	472d                	li	a4,11
+    80200472:	16f76a63          	bltu	a4,a5,802005e6 <exception_handler+0x17a>
+    80200476:	00001717          	auipc	a4,0x1
+    8020047a:	eb270713          	addi	a4,a4,-334 # 80201328 <etext+0x814>
+    8020047e:	078a                	slli	a5,a5,0x2
+    80200480:	97ba                	add	a5,a5,a4
+    80200482:	439c                	lw	a5,0(a5)
 void exception_handler(struct trapframe *tf) {
-    80200482:	1141                	addi	sp,sp,-16
-    80200484:	e022                	sd	s0,0(sp)
-    80200486:	97ba                	add	a5,a5,a4
-    80200488:	e406                	sd	ra,8(sp)
-    8020048a:	842a                	mv	s0,a0
-    8020048c:	8782                	jr	a5
+    80200484:	1141                	addi	sp,sp,-16
+    80200486:	e022                	sd	s0,0(sp)
+    80200488:	97ba                	add	a5,a5,a4
+    8020048a:	e406                	sd	ra,8(sp)
+    8020048c:	842a                	mv	s0,a0
+    8020048e:	8782                	jr	a5
         case CAUSE_SUPERVISOR_ECALL:
             cprintf("Exception type: Supervisor ecall\n");
             cprintf("Supervisor call at: 0x%x\n", tf->epc);
             break;
         case CAUSE_HYPERVISOR_ECALL:
             cprintf("Exception type: Hypervisor ecall\n");
-    8020048e:	00001517          	auipc	a0,0x1
-    80200492:	e1a50513          	addi	a0,a0,-486 # 802012a8 <etext+0x794>
-    80200496:	bdbff0ef          	jal	ra,80200070 <cprintf>
+    80200490:	00001517          	auipc	a0,0x1
+    80200494:	e1850513          	addi	a0,a0,-488 # 802012a8 <etext+0x794>
+    80200498:	bd9ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Hypervisor call at: 0x%x\n", tf->epc);
-    8020049a:	10843583          	ld	a1,264(s0)
-    8020049e:	00001517          	auipc	a0,0x1
-    802004a2:	e3250513          	addi	a0,a0,-462 # 802012d0 <etext+0x7bc>
+    8020049c:	10843583          	ld	a1,264(s0)
+    802004a0:	00001517          	auipc	a0,0x1
+    802004a4:	e3050513          	addi	a0,a0,-464 # 802012d0 <etext+0x7bc>
             break;
         default:
             print_trapframe(tf);
             break;
     }
 }
-    802004a6:	6402                	ld	s0,0(sp)
-    802004a8:	60a2                	ld	ra,8(sp)
-    802004aa:	0141                	addi	sp,sp,16
+    802004a8:	6402                	ld	s0,0(sp)
+    802004aa:	60a2                	ld	ra,8(sp)
+    802004ac:	0141                	addi	sp,sp,16
             cprintf("Faulty instruction address: 0x%x\n", tf->epc);
-    802004ac:	b6d1                	j	80200070 <cprintf>
+    802004ae:	b6c9                	j	80200070 <cprintf>
             cprintf("Exception type: Machine ecall\n");
-    802004ae:	00001517          	auipc	a0,0x1
-    802004b2:	e4250513          	addi	a0,a0,-446 # 802012f0 <etext+0x7dc>
-    802004b6:	bbbff0ef          	jal	ra,80200070 <cprintf>
+    802004b0:	00001517          	auipc	a0,0x1
+    802004b4:	e4050513          	addi	a0,a0,-448 # 802012f0 <etext+0x7dc>
+    802004b8:	bb9ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Machine call at: 0x%x\n", tf->epc);
-    802004ba:	10843583          	ld	a1,264(s0)
-    802004be:	00001517          	auipc	a0,0x1
-    802004c2:	e5250513          	addi	a0,a0,-430 # 80201310 <etext+0x7fc>
-    802004c6:	b7c5                	j	802004a6 <exception_handler+0x3c>
+    802004bc:	10843583          	ld	a1,264(s0)
+    802004c0:	00001517          	auipc	a0,0x1
+    802004c4:	e5050513          	addi	a0,a0,-432 # 80201310 <etext+0x7fc>
+    802004c8:	b7c5                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Misaligned fetch\n");
-    802004c8:	00001517          	auipc	a0,0x1
-    802004cc:	bc050513          	addi	a0,a0,-1088 # 80201088 <etext+0x574>
+    802004ca:	00001517          	auipc	a0,0x1
+    802004ce:	bbe50513          	addi	a0,a0,-1090 # 80201088 <etext+0x574>
             cprintf("Exception type: Fault fetch\n");
-    802004d0:	ba1ff0ef          	jal	ra,80200070 <cprintf>
+    802004d2:	b9fff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty instruction address: 0x%x\n", tf->epc);
-    802004d4:	10843583          	ld	a1,264(s0)
+    802004d6:	10843583          	ld	a1,264(s0)
 }
-    802004d8:	6402                	ld	s0,0(sp)
-    802004da:	60a2                	ld	ra,8(sp)
+    802004da:	6402                	ld	s0,0(sp)
+    802004dc:	60a2                	ld	ra,8(sp)
             cprintf("Faulty instruction address: 0x%x\n", tf->epc);
-    802004dc:	00001517          	auipc	a0,0x1
-    802004e0:	bd450513          	addi	a0,a0,-1068 # 802010b0 <etext+0x59c>
+    802004de:	00001517          	auipc	a0,0x1
+    802004e2:	bd250513          	addi	a0,a0,-1070 # 802010b0 <etext+0x59c>
 }
-    802004e4:	0141                	addi	sp,sp,16
+    802004e6:	0141                	addi	sp,sp,16
             cprintf("Faulty instruction address: 0x%x\n", tf->epc);
-    802004e6:	b669                	j	80200070 <cprintf>
+    802004e8:	b661                	j	80200070 <cprintf>
             cprintf("Exception type: Fault fetch\n");
-    802004e8:	00001517          	auipc	a0,0x1
-    802004ec:	bf050513          	addi	a0,a0,-1040 # 802010d8 <etext+0x5c4>
-    802004f0:	b7c5                	j	802004d0 <exception_handler+0x66>
+    802004ea:	00001517          	auipc	a0,0x1
+    802004ee:	bee50513          	addi	a0,a0,-1042 # 802010d8 <etext+0x5c4>
+    802004f2:	b7c5                	j	802004d2 <exception_handler+0x66>
             cprintf("Exception type: Illegal instruction\n");
-    802004f2:	00001517          	auipc	a0,0x1
-    802004f6:	c0650513          	addi	a0,a0,-1018 # 802010f8 <etext+0x5e4>
-    802004fa:	b77ff0ef          	jal	ra,80200070 <cprintf>
+    802004f4:	00001517          	auipc	a0,0x1
+    802004f8:	c0450513          	addi	a0,a0,-1020 # 802010f8 <etext+0x5e4>
+    802004fc:	b75ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Illegal instruction caught at 0x%x\n", tf->epc);
-    802004fe:	10843583          	ld	a1,264(s0)
-    80200502:	00001517          	auipc	a0,0x1
-    80200506:	c1e50513          	addi	a0,a0,-994 # 80201120 <etext+0x60c>
-    8020050a:	b67ff0ef          	jal	ra,80200070 <cprintf>
+    80200500:	10843583          	ld	a1,264(s0)
+    80200504:	00001517          	auipc	a0,0x1
+    80200508:	c1c50513          	addi	a0,a0,-996 # 80201120 <etext+0x60c>
+    8020050c:	b65ff0ef          	jal	ra,80200070 <cprintf>
             tf->epc += 4; // 更新epc
-    8020050e:	10843783          	ld	a5,264(s0)
-    80200512:	0791                	addi	a5,a5,4
-    80200514:	10f43423          	sd	a5,264(s0)
+    80200510:	10843783          	ld	a5,264(s0)
+    80200514:	0791                	addi	a5,a5,4
+    80200516:	10f43423          	sd	a5,264(s0)
 }
-    80200518:	60a2                	ld	ra,8(sp)
-    8020051a:	6402                	ld	s0,0(sp)
-    8020051c:	0141                	addi	sp,sp,16
-    8020051e:	8082                	ret
+    8020051a:	60a2                	ld	ra,8(sp)
+    8020051c:	6402                	ld	s0,0(sp)
+    8020051e:	0141                	addi	sp,sp,16
+    80200520:	8082                	ret
             cprintf("Exception type: Breakpoint\n");
-    80200520:	00001517          	auipc	a0,0x1
-    80200524:	c2850513          	addi	a0,a0,-984 # 80201148 <etext+0x634>
-    80200528:	b49ff0ef          	jal	ra,80200070 <cprintf>
+    80200522:	00001517          	auipc	a0,0x1
+    80200526:	c2650513          	addi	a0,a0,-986 # 80201148 <etext+0x634>
+    8020052a:	b47ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("ebreak caught at 0x%x\n", tf->epc);
-    8020052c:	10843583          	ld	a1,264(s0)
-    80200530:	00001517          	auipc	a0,0x1
-    80200534:	c3850513          	addi	a0,a0,-968 # 80201168 <etext+0x654>
-    80200538:	b39ff0ef          	jal	ra,80200070 <cprintf>
+    8020052e:	10843583          	ld	a1,264(s0)
+    80200532:	00001517          	auipc	a0,0x1
+    80200536:	c3650513          	addi	a0,a0,-970 # 80201168 <etext+0x654>
+    8020053a:	b37ff0ef          	jal	ra,80200070 <cprintf>
             tf->epc += 2; // 更新epc
-    8020053c:	10843783          	ld	a5,264(s0)
-    80200540:	0789                	addi	a5,a5,2
-    80200542:	10f43423          	sd	a5,264(s0)
+    8020053e:	10843783          	ld	a5,264(s0)
+    80200542:	0789                	addi	a5,a5,2
+    80200544:	10f43423          	sd	a5,264(s0)
             break;
-    80200546:	bfc9                	j	80200518 <exception_handler+0xae>
+    80200548:	bfc9                	j	8020051a <exception_handler+0xae>
             cprintf("Exception type: Misaligned load\n");
-    80200548:	00001517          	auipc	a0,0x1
-    8020054c:	c3850513          	addi	a0,a0,-968 # 80201180 <etext+0x66c>
-    80200550:	b21ff0ef          	jal	ra,80200070 <cprintf>
+    8020054a:	00001517          	auipc	a0,0x1
+    8020054e:	c3650513          	addi	a0,a0,-970 # 80201180 <etext+0x66c>
+    80200552:	b1fff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
-    80200554:	10843583          	ld	a1,264(s0)
-    80200558:	00001517          	auipc	a0,0x1
-    8020055c:	c5050513          	addi	a0,a0,-944 # 802011a8 <etext+0x694>
-    80200560:	b799                	j	802004a6 <exception_handler+0x3c>
+    80200556:	10843583          	ld	a1,264(s0)
+    8020055a:	00001517          	auipc	a0,0x1
+    8020055e:	c4e50513          	addi	a0,a0,-946 # 802011a8 <etext+0x694>
+    80200562:	b799                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Fault load\n");
-    80200562:	00001517          	auipc	a0,0x1
-    80200566:	c5e50513          	addi	a0,a0,-930 # 802011c0 <etext+0x6ac>
-    8020056a:	b07ff0ef          	jal	ra,80200070 <cprintf>
+    80200564:	00001517          	auipc	a0,0x1
+    80200568:	c5c50513          	addi	a0,a0,-932 # 802011c0 <etext+0x6ac>
+    8020056c:	b05ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
-    8020056e:	10843583          	ld	a1,264(s0)
-    80200572:	00001517          	auipc	a0,0x1
-    80200576:	c3650513          	addi	a0,a0,-970 # 802011a8 <etext+0x694>
-    8020057a:	b735                	j	802004a6 <exception_handler+0x3c>
+    80200570:	10843583          	ld	a1,264(s0)
+    80200574:	00001517          	auipc	a0,0x1
+    80200578:	c3450513          	addi	a0,a0,-972 # 802011a8 <etext+0x694>
+    8020057c:	b735                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Misaligned store\n");
-    8020057c:	00001517          	auipc	a0,0x1
-    80200580:	c6450513          	addi	a0,a0,-924 # 802011e0 <etext+0x6cc>
-    80200584:	aedff0ef          	jal	ra,80200070 <cprintf>
+    8020057e:	00001517          	auipc	a0,0x1
+    80200582:	c6250513          	addi	a0,a0,-926 # 802011e0 <etext+0x6cc>
+    80200586:	aebff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
-    80200588:	10843583          	ld	a1,264(s0)
-    8020058c:	00001517          	auipc	a0,0x1
-    80200590:	c1c50513          	addi	a0,a0,-996 # 802011a8 <etext+0x694>
-    80200594:	bf09                	j	802004a6 <exception_handler+0x3c>
+    8020058a:	10843583          	ld	a1,264(s0)
+    8020058e:	00001517          	auipc	a0,0x1
+    80200592:	c1a50513          	addi	a0,a0,-998 # 802011a8 <etext+0x694>
+    80200596:	bf09                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Fault store\n");
-    80200596:	00001517          	auipc	a0,0x1
-    8020059a:	c7250513          	addi	a0,a0,-910 # 80201208 <etext+0x6f4>
-    8020059e:	ad3ff0ef          	jal	ra,80200070 <cprintf>
+    80200598:	00001517          	auipc	a0,0x1
+    8020059c:	c7050513          	addi	a0,a0,-912 # 80201208 <etext+0x6f4>
+    802005a0:	ad1ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
-    802005a2:	10843583          	ld	a1,264(s0)
-    802005a6:	00001517          	auipc	a0,0x1
-    802005aa:	c0250513          	addi	a0,a0,-1022 # 802011a8 <etext+0x694>
-    802005ae:	bde5                	j	802004a6 <exception_handler+0x3c>
+    802005a4:	10843583          	ld	a1,264(s0)
+    802005a8:	00001517          	auipc	a0,0x1
+    802005ac:	c0050513          	addi	a0,a0,-1024 # 802011a8 <etext+0x694>
+    802005b0:	bde5                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: User ecall\n");
-    802005b0:	00001517          	auipc	a0,0x1
-    802005b4:	c7850513          	addi	a0,a0,-904 # 80201228 <etext+0x714>
-    802005b8:	ab9ff0ef          	jal	ra,80200070 <cprintf>
+    802005b2:	00001517          	auipc	a0,0x1
+    802005b6:	c7650513          	addi	a0,a0,-906 # 80201228 <etext+0x714>
+    802005ba:	ab7ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("User call at: 0x%x\n", tf->epc);
-    802005bc:	10843583          	ld	a1,264(s0)
-    802005c0:	00001517          	auipc	a0,0x1
-    802005c4:	c8850513          	addi	a0,a0,-888 # 80201248 <etext+0x734>
-    802005c8:	bdf9                	j	802004a6 <exception_handler+0x3c>
+    802005be:	10843583          	ld	a1,264(s0)
+    802005c2:	00001517          	auipc	a0,0x1
+    802005c6:	c8650513          	addi	a0,a0,-890 # 80201248 <etext+0x734>
+    802005ca:	bdf9                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Supervisor ecall\n");
-    802005ca:	00001517          	auipc	a0,0x1
-    802005ce:	c9650513          	addi	a0,a0,-874 # 80201260 <etext+0x74c>
-    802005d2:	a9fff0ef          	jal	ra,80200070 <cprintf>
+    802005cc:	00001517          	auipc	a0,0x1
+    802005d0:	c9450513          	addi	a0,a0,-876 # 80201260 <etext+0x74c>
+    802005d4:	a9dff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Supervisor call at: 0x%x\n", tf->epc);
-    802005d6:	10843583          	ld	a1,264(s0)
-    802005da:	00001517          	auipc	a0,0x1
-    802005de:	cae50513          	addi	a0,a0,-850 # 80201288 <etext+0x774>
-    802005e2:	b5d1                	j	802004a6 <exception_handler+0x3c>
+    802005d8:	10843583          	ld	a1,264(s0)
+    802005dc:	00001517          	auipc	a0,0x1
+    802005e0:	cac50513          	addi	a0,a0,-852 # 80201288 <etext+0x774>
+    802005e4:	b5d1                	j	802004a8 <exception_handler+0x3c>
             print_trapframe(tf);
-    802005e4:	b341                	j	80200364 <print_trapframe>
+    802005e6:	bbbd                	j	80200364 <print_trapframe>
 
-00000000802005e6 <trap>:
+00000000802005e8 <trap>:
 
 
 /* trap_dispatch - dispatch based on what type of trap occurred */
 static inline void trap_dispatch(struct trapframe *tf) {
     if ((intptr_t)tf->cause < 0) {
-    802005e6:	11853783          	ld	a5,280(a0)
-    802005ea:	0007c363          	bltz	a5,802005f0 <trap+0xa>
+    802005e8:	11853783          	ld	a5,280(a0)
+    802005ec:	0007c363          	bltz	a5,802005f2 <trap+0xa>
         // interrupts
         interrupt_handler(tf);
     } else {
         // exceptions
         exception_handler(tf);
-    802005ee:	bdb5                	j	8020046a <exception_handler>
+    802005f0:	bdb5                	j	8020046c <exception_handler>
         interrupt_handler(tf);
-    802005f0:	bbd1                	j	802003c4 <interrupt_handler>
-	...
+    802005f2:	bbc9                	j	802003c4 <interrupt_handler>
 
 00000000802005f4 <__alltraps>:
     .endm
@@ -851,7 +857,7 @@ __alltraps:
     move  a0, sp
     80200656:	850a                	mv	a0,sp
     jal trap
-    80200658:	f8fff0ef          	jal	ra,802005e6 <trap>
+    80200658:	f91ff0ef          	jal	ra,802005e8 <trap>
 
 000000008020065c <__trapret>:
     # sp should be the same as before "jal trap"

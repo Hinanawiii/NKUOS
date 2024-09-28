@@ -118,7 +118,8 @@ void interrupt_handler(struct trapframe *tf) {
             if(ticks % TICK_NUM == 0)
             {
                 print_ticks();
-                if(++num == 10)
+                num++;
+                if(num == 10)
                 {
                     sbi_shutdown();
                 }

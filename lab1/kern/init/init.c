@@ -32,6 +32,9 @@ int kern_init(void) {
     clock_init();  // init clock interrupt
 
     intr_enable();  // enable irq interrupt
+    /*Lab1 2211459
+    加入触发异常中断
+    */
     asm volatile (
         "mret"
     );
