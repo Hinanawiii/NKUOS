@@ -1,3 +1,0 @@
-target remote localhost:12345
-break *0x
-continue

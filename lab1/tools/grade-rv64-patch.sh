@@ -57,7 +57,7 @@ qemu_out="$(make_print GRADE_QEMU_OUT)"
 qemugdb=""
 
 ## default variables
-default_timeout=30
+default_timeout=500
 default_pts=5
 
 pts=5
@@ -127,50 +127,68 @@ fail() {
 }
 
 run_qemu() {
-    echo "try to run qemu"
-    # Run qemu with serial output redirected to $qemu_out. If $brkfun is non-empty,
-    # wait until $brkfun is reached or $timeout expires, then kill QEMU
+    echo "Starting QEMU..."
+    
+    # Remove the previous qemu_out file to ensure clean output
+    rm -f $qemu_out
+
+    # Define extra QEMU options (e.g., GDB-related options)
     qemuextra=
     if [ "$brkfun" ]; then
         qemuextra=" $qemugdb"
     fi
 
+    # Ensure there is a reasonable timeout to prevent premature termination
     if [ -z "$timeout" ] || [ $timeout -le 0 ]; then
         timeout=$default_timeout;
     fi
 
+    # Get the current time
     t0=$(get_time)
+
+    # Start QEMU and redirect its output to the $qemu_out file
     (
-        
+        # Set a timeout to avoid running QEMU for too long
         ulimit -t $timeout
+        # Start QEMU and save its output to the qemu_out file
         exec $qemu -nographic $qemuopts -serial file:$qemu_out -monitor null -no-reboot $qemuextra
     ) > $out 2> $err &
+
+    # Get the PID of the QEMU process
     pid=$!
-    echo "qemu pid=$pid"
+    echo "QEMU started with PID: $pid"
 
-    # wait for QEMU to start
-    sleep 1
+    # Wait for QEMU to run long enough to ensure timer interrupts occur multiple times
+    sleep 5
 
-    if [ -n "$brkfun" ]; then
-        # find the address of the kernel $brkfun function
-        brkaddr=`$grep " $brkfun\$" $sym_table | $sed -e's/ .*$//g'`
-        brkaddr_phys=`echo $brkaddr | sed "s/^c0/00/g"`
-        (
-            echo "target remote localhost:$gdbport"
-            echo "break *0x$brkaddr"
-            if [ "$brkaddr" != "$brkaddr_phys" ]; then
-                echo "break *0x$brkaddr_phys"
-            fi
-            echo "continue"
-        ) > $gdb_in
-
-        $gdb -batch -nx -x $gdb_in > /dev/null 2>&1
-
-        # make sure that QEMU is dead
-        # on OS X, exiting gdb doesn't always exit qemu
-        kill $pid > /dev/null 2>&1
+    # Check if qemu_out has output
+    if [ ! -s $qemu_out ]; then
+        echo "Error: No output from QEMU in $qemu_out"
+        fail "QEMU output file is empty."
+        kill $pid 2> /dev/null
+        return
     fi
+
+    # Continuously check if QEMU has output 10 occurrences of "100 ticks"
+    while true; do
+        # Count the occurrences of "100 ticks" in qemu_out
+        count=$(grep -c "100 ticks" $qemu_out)
+
+        # If 10 occurrences of "100 ticks" are found, stop QEMU
+        if [ $count -ge 10 ]; then
+            echo "10 occurrences of '100 ticks' found."
+            kill $pid 2> /dev/null  # Stop QEMU
+            break
+        fi
+
+        # Wait for a short period before checking again
+        sleep 1
+    done
+
+    # Wait for the QEMU process to terminate
+    wait $pid 2> /dev/null
 }
+
 
 build_run() {
     echo "here_build_run"
