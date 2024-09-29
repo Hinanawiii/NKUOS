@@ -21,7 +21,7 @@ Domain0 Boot HART         : 0
 Domain0 HARTs             : 0*
 Domain0 Region00          : 0x0000000080000000-0x000000008001ffff ()
 Domain0 Region01          : 0x0000000000000000-0xffffffffffffffff (R,W,X)
-Domain0 Next Address      : 0x0000000000000000
+Domain0 Next Address      : 0x0000000080200000
 Domain0 Next Arg1         : 0x0000000087000000
 Domain0 Next Mode         : S-mode
 Domain0 SysReset          : yes
@@ -37,3 +37,18 @@ Boot HART MHPM Count      : 0
 Boot HART MHPM Count      : 0
 Boot HART MIDELEG         : 0x0000000000000222
 Boot HART MEDELEG         : 0x000000000000b109
+(THU.CST) os is loading ...
+
+
+Special kernel symbols:
+  entry  0x000000008020000a (virtual)
+  etext  0x0000000080200b14 (virtual)
+  edata  0x0000000080204010 (virtual)
+  end    0x0000000080204028 (virtual)
+Kernel executable memory footprint: 17KB
+++ setup timer interrupts
+Exception type: Illegal instruction
+Illegal instruction caught at 0x8020004e
+Exception type: Breakpoint
+ebreak caught at 0x80200052
+100 ticks
