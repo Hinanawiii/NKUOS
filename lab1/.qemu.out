@@ -48,7 +48,7 @@ Special kernel symbols:
 Kernel executable memory footprint: 17KB
 ++ setup timer interrupts
 Exception type: Illegal instruction
-Illegal instruction caught at 0x8020004e
+Illegal instruction caught at 0x000000008020004e
 Exception type: Breakpoint
-ebreak caught at 0x80200052
+ebreak caught at 0x0000000080200052
 100 ticks

@@ -631,7 +631,7 @@ void exception_handler(struct trapframe *tf) {
     80200470:	472d                	li	a4,11
     80200472:	16f76a63          	bltu	a4,a5,802005e6 <exception_handler+0x17a>
     80200476:	00001717          	auipc	a4,0x1
-    8020047a:	eb270713          	addi	a4,a4,-334 # 80201328 <etext+0x814>
+    8020047a:	eba70713          	addi	a4,a4,-326 # 80201330 <etext+0x81c>
     8020047e:	078a                	slli	a5,a5,0x2
     80200480:	97ba                	add	a5,a5,a4
     80200482:	439c                	lw	a5,0(a5)
@@ -649,12 +649,12 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_HYPERVISOR_ECALL:
             cprintf("Exception type: Hypervisor ecall\n");
     80200490:	00001517          	auipc	a0,0x1
-    80200494:	e1850513          	addi	a0,a0,-488 # 802012a8 <etext+0x794>
+    80200494:	e2050513          	addi	a0,a0,-480 # 802012b0 <etext+0x79c>
     80200498:	bd9ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Hypervisor call at: 0x%x\n", tf->epc);
     8020049c:	10843583          	ld	a1,264(s0)
     802004a0:	00001517          	auipc	a0,0x1
-    802004a4:	e3050513          	addi	a0,a0,-464 # 802012d0 <etext+0x7bc>
+    802004a4:	e3850513          	addi	a0,a0,-456 # 802012d8 <etext+0x7c4>
             break;
         default:
             print_trapframe(tf);
@@ -668,12 +668,12 @@ void exception_handler(struct trapframe *tf) {
     802004ae:	b6c9                	j	80200070 <cprintf>
             cprintf("Exception type: Machine ecall\n");
     802004b0:	00001517          	auipc	a0,0x1
-    802004b4:	e4050513          	addi	a0,a0,-448 # 802012f0 <etext+0x7dc>
+    802004b4:	e4850513          	addi	a0,a0,-440 # 802012f8 <etext+0x7e4>
     802004b8:	bb9ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Machine call at: 0x%x\n", tf->epc);
     802004bc:	10843583          	ld	a1,264(s0)
     802004c0:	00001517          	auipc	a0,0x1
-    802004c4:	e5050513          	addi	a0,a0,-432 # 80201310 <etext+0x7fc>
+    802004c4:	e5850513          	addi	a0,a0,-424 # 80201318 <etext+0x804>
     802004c8:	b7c5                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Misaligned fetch\n");
     802004ca:	00001517          	auipc	a0,0x1
@@ -700,7 +700,7 @@ void exception_handler(struct trapframe *tf) {
     802004f4:	00001517          	auipc	a0,0x1
     802004f8:	c0450513          	addi	a0,a0,-1020 # 802010f8 <etext+0x5e4>
     802004fc:	b75ff0ef          	jal	ra,80200070 <cprintf>
-            cprintf("Illegal instruction caught at 0x%x\n", tf->epc);
+            cprintf("Illegal instruction caught at 0x%016lx\n", tf->epc);
     80200500:	10843583          	ld	a1,264(s0)
     80200504:	00001517          	auipc	a0,0x1
     80200508:	c1c50513          	addi	a0,a0,-996 # 80201120 <etext+0x60c>
@@ -718,7 +718,7 @@ void exception_handler(struct trapframe *tf) {
     80200522:	00001517          	auipc	a0,0x1
     80200526:	c2650513          	addi	a0,a0,-986 # 80201148 <etext+0x634>
     8020052a:	b47ff0ef          	jal	ra,80200070 <cprintf>
-            cprintf("ebreak caught at 0x%x\n", tf->epc);
+            cprintf("ebreak caught at 0x%016lx\n", tf->epc);
     8020052e:	10843583          	ld	a1,264(s0)
     80200532:	00001517          	auipc	a0,0x1
     80200536:	c3650513          	addi	a0,a0,-970 # 80201168 <etext+0x654>
@@ -727,61 +727,61 @@ void exception_handler(struct trapframe *tf) {
     8020053e:	10843783          	ld	a5,264(s0)
     80200542:	0789                	addi	a5,a5,2
     80200544:	10f43423          	sd	a5,264(s0)
-            break;
+            break;  
     80200548:	bfc9                	j	8020051a <exception_handler+0xae>
             cprintf("Exception type: Misaligned load\n");
     8020054a:	00001517          	auipc	a0,0x1
-    8020054e:	c3650513          	addi	a0,a0,-970 # 80201180 <etext+0x66c>
+    8020054e:	c3e50513          	addi	a0,a0,-962 # 80201188 <etext+0x674>
     80200552:	b1fff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
     80200556:	10843583          	ld	a1,264(s0)
     8020055a:	00001517          	auipc	a0,0x1
-    8020055e:	c4e50513          	addi	a0,a0,-946 # 802011a8 <etext+0x694>
+    8020055e:	c5650513          	addi	a0,a0,-938 # 802011b0 <etext+0x69c>
     80200562:	b799                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Fault load\n");
     80200564:	00001517          	auipc	a0,0x1
-    80200568:	c5c50513          	addi	a0,a0,-932 # 802011c0 <etext+0x6ac>
+    80200568:	c6450513          	addi	a0,a0,-924 # 802011c8 <etext+0x6b4>
     8020056c:	b05ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
     80200570:	10843583          	ld	a1,264(s0)
     80200574:	00001517          	auipc	a0,0x1
-    80200578:	c3450513          	addi	a0,a0,-972 # 802011a8 <etext+0x694>
+    80200578:	c3c50513          	addi	a0,a0,-964 # 802011b0 <etext+0x69c>
     8020057c:	b735                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Misaligned store\n");
     8020057e:	00001517          	auipc	a0,0x1
-    80200582:	c6250513          	addi	a0,a0,-926 # 802011e0 <etext+0x6cc>
+    80200582:	c6a50513          	addi	a0,a0,-918 # 802011e8 <etext+0x6d4>
     80200586:	aebff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
     8020058a:	10843583          	ld	a1,264(s0)
     8020058e:	00001517          	auipc	a0,0x1
-    80200592:	c1a50513          	addi	a0,a0,-998 # 802011a8 <etext+0x694>
+    80200592:	c2250513          	addi	a0,a0,-990 # 802011b0 <etext+0x69c>
     80200596:	bf09                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Fault store\n");
     80200598:	00001517          	auipc	a0,0x1
-    8020059c:	c7050513          	addi	a0,a0,-912 # 80201208 <etext+0x6f4>
+    8020059c:	c7850513          	addi	a0,a0,-904 # 80201210 <etext+0x6fc>
     802005a0:	ad1ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Faulty address: 0x%x\n", tf->epc);
     802005a4:	10843583          	ld	a1,264(s0)
     802005a8:	00001517          	auipc	a0,0x1
-    802005ac:	c0050513          	addi	a0,a0,-1024 # 802011a8 <etext+0x694>
+    802005ac:	c0850513          	addi	a0,a0,-1016 # 802011b0 <etext+0x69c>
     802005b0:	bde5                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: User ecall\n");
     802005b2:	00001517          	auipc	a0,0x1
-    802005b6:	c7650513          	addi	a0,a0,-906 # 80201228 <etext+0x714>
+    802005b6:	c7e50513          	addi	a0,a0,-898 # 80201230 <etext+0x71c>
     802005ba:	ab7ff0ef          	jal	ra,80200070 <cprintf>
             cprintf("User call at: 0x%x\n", tf->epc);
     802005be:	10843583          	ld	a1,264(s0)
     802005c2:	00001517          	auipc	a0,0x1
-    802005c6:	c8650513          	addi	a0,a0,-890 # 80201248 <etext+0x734>
+    802005c6:	c8e50513          	addi	a0,a0,-882 # 80201250 <etext+0x73c>
     802005ca:	bdf9                	j	802004a8 <exception_handler+0x3c>
             cprintf("Exception type: Supervisor ecall\n");
     802005cc:	00001517          	auipc	a0,0x1
-    802005d0:	c9450513          	addi	a0,a0,-876 # 80201260 <etext+0x74c>
+    802005d0:	c9c50513          	addi	a0,a0,-868 # 80201268 <etext+0x754>
     802005d4:	a9dff0ef          	jal	ra,80200070 <cprintf>
             cprintf("Supervisor call at: 0x%x\n", tf->epc);
     802005d8:	10843583          	ld	a1,264(s0)
     802005dc:	00001517          	auipc	a0,0x1
-    802005e0:	cac50513          	addi	a0,a0,-852 # 80201288 <etext+0x774>
+    802005e0:	cb450513          	addi	a0,a0,-844 # 80201290 <etext+0x77c>
     802005e4:	b5d1                	j	802004a8 <exception_handler+0x3c>
             print_trapframe(tf);
     802005e6:	bbbd                	j	80200364 <print_trapframe>
@@ -954,7 +954,7 @@ printnum(void (*putch)(int, void*), void *putdat,
     putch("0123456789abcdef"[mod], putdat);
     802006e2:	1a02                	slli	s4,s4,0x20
     802006e4:	00001797          	auipc	a5,0x1
-    802006e8:	c7478793          	addi	a5,a5,-908 # 80201358 <etext+0x844>
+    802006e8:	c7c78793          	addi	a5,a5,-900 # 80201360 <etext+0x84c>
     802006ec:	020a5a13          	srli	s4,s4,0x20
     802006f0:	9a3e                	add	s4,s4,a5
 }
@@ -1020,7 +1020,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap) 
         width = precision = -1;
     8020073e:	5b7d                	li	s6,-1
     80200740:	00001a97          	auipc	s5,0x1
-    80200744:	c4ca8a93          	addi	s5,s5,-948 # 8020138c <etext+0x878>
+    80200744:	c54a8a93          	addi	s5,s5,-940 # 80201394 <etext+0x880>
         case 'e':
             err = va_arg(ap, int);
             if (err < 0) {
@@ -1028,7 +1028,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap) 
             }
             if (err > MAXERROR || (p = error_string[err]) == NULL) {
     80200748:	00001b97          	auipc	s7,0x1
-    8020074c:	e20b8b93          	addi	s7,s7,-480 # 80201568 <error_string>
+    8020074c:	e28b8b93          	addi	s7,s7,-472 # 80201570 <error_string>
         while ((ch = *(unsigned char *)fmt ++) != '%') {
     80200750:	000d4503          	lbu	a0,0(s10)
     80200754:	001d0413          	addi	s0,s10,1
@@ -1341,21 +1341,21 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap) 
                 printfmt(putch, putdat, "%s", p);
     8020099c:	86be                	mv	a3,a5
     8020099e:	00001617          	auipc	a2,0x1
-    802009a2:	9ea60613          	addi	a2,a2,-1558 # 80201388 <etext+0x874>
+    802009a2:	9f260613          	addi	a2,a2,-1550 # 80201390 <etext+0x87c>
     802009a6:	85a6                	mv	a1,s1
     802009a8:	854a                	mv	a0,s2
     802009aa:	0ce000ef          	jal	ra,80200a78 <printfmt>
     802009ae:	b34d                	j	80200750 <vprintfmt+0x3a>
                 printfmt(putch, putdat, "error %d", err);
     802009b0:	00001617          	auipc	a2,0x1
-    802009b4:	9c860613          	addi	a2,a2,-1592 # 80201378 <etext+0x864>
+    802009b4:	9d060613          	addi	a2,a2,-1584 # 80201380 <etext+0x86c>
     802009b8:	85a6                	mv	a1,s1
     802009ba:	854a                	mv	a0,s2
     802009bc:	0bc000ef          	jal	ra,80200a78 <printfmt>
     802009c0:	bb41                	j	80200750 <vprintfmt+0x3a>
                 p = "(null)";
     802009c2:	00001417          	auipc	s0,0x1
-    802009c6:	9ae40413          	addi	s0,s0,-1618 # 80201370 <etext+0x85c>
+    802009c6:	9b640413          	addi	s0,s0,-1610 # 80201378 <etext+0x864>
                 for (width -= strnlen(p, precision); width > 0; width --) {
     802009ca:	85e2                	mv	a1,s8
     802009cc:	8522                	mv	a0,s0
@@ -1418,14 +1418,14 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap) 
     80200a48:	f6d79de3          	bne	a5,a3,802009c2 <vprintfmt+0x2ac>
                 p = "(null)";
     80200a4c:	00001417          	auipc	s0,0x1
-    80200a50:	92440413          	addi	s0,s0,-1756 # 80201370 <etext+0x85c>
+    80200a50:	92c40413          	addi	s0,s0,-1748 # 80201378 <etext+0x864>
             for (; (ch = *p ++) != '\0' && (precision < 0 || -- precision >= 0); width --) {
     80200a54:	02800793          	li	a5,40
     80200a58:	02800513          	li	a0,40
     80200a5c:	00140a13          	addi	s4,s0,1
     80200a60:	bd6d                	j	8020091a <vprintfmt+0x204>
     80200a62:	00001a17          	auipc	s4,0x1
-    80200a66:	90fa0a13          	addi	s4,s4,-1777 # 80201371 <etext+0x85d>
+    80200a66:	917a0a13          	addi	s4,s4,-1769 # 80201379 <etext+0x865>
     80200a6a:	02800513          	li	a0,40
     80200a6e:	02800793          	li	a5,40
                 if (altflag && (ch < ' ' || ch > '~')) {

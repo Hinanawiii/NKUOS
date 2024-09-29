@@ -376,14 +376,14 @@ brkfun=readline
 
 run_qemu
 
+pts=30
+quick_check 'Exception type: Illegal instruction'                     \
+    'Illegal instruction caught at 0x000000008020004e'      
 
-#pts=30
-#quick_check 'Exception type: breakpoint'                     \
-#    'ebreak caught at 0x000000008020004e'                                    
+pts=30
+quick_check 'Exception type: breakpoint'                     \
+    'ebreak caught at 0x0000000080200052'                                      
 
-#pts=30
-#quick_check 'Exception type: Illegal instruction'                     \
-#    'Illegal instruction caught at 0x0000000080200050'      
 
 pts=100
 quick_check '100 ticks'     \
