@@ -4,7 +4,7 @@
 #include <buddy.h>
 #include <memlayout.h>
 
-free_area_t free_area;
+static free_area_t free_area;
 
 #define free_list (free_area.free_list)
 #define nr_free (free_area.nr_free)
@@ -36,7 +36,7 @@ static void buddy_init_memmap(struct Page *base, size_t n) {
     total_size = n;
     tree_size = NEXT_POWER_OF_2(n);  // 计算出最近的 2 的幂次大小
     memory_area = base;
-    tree_nodes = (size_t *)KADDR(page2pa(base));
+    tree_nodes = (size_t *)(uintptr_t)page2pa(base);
     memset(tree_nodes, 0, tree_size * sizeof(size_t));
 
     nr_free = n;
