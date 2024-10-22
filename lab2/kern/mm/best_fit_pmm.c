@@ -74,6 +74,7 @@ best_fit_init_memmap(struct Page *base, size_t n) {
         assert(PageReserved(p));
 
         /*LAB2 EXERCISE 2: YOUR CODE*/ 
+        
         // 清空当前页框的标志和属性信息，并将页框的引用计数设置为0
     }
     base->property = n;
