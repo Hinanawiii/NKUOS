@@ -2,6 +2,7 @@
 #include <list.h>
 #include <string.h>
 #include <buddy.h>
+#include <memlayout.h>
 
 free_area_t free_area;
 
