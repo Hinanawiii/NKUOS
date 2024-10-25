@@ -1,6 +1,6 @@
 # lab2实验报告
 
-## 练习1：理解first-fit 连续物理内存分配算法
+## 练习1：理解first-fit 连续物理内存分配算法（思考题）
 
 first-fit 连续物理内存分配算法作为物理内存分配一个很基础的方法，需要同学们理解它的实现过程。请大家仔细阅读实验手册的教程并结合`kern/mm/default_pmm.c`中的相关代码，认真分析default_init，default_init_memmap，default_alloc_pages， default_free_pages等相关函数，并描述程序在进行物理内存分配的过程以及各个函数的作用。 请在实验报告中简要说明你的设计实现过程。请回答如下问题：
 
@@ -131,6 +131,62 @@ First-Fit 算法的核心思想是在空闲内存块列表中，从头开始查�
 
 - 你的 Best-Fit 算法是否有进一步的改进空间？
 
+#### 1.`best_fit_init_memmap` 函数的修改
+
+```
+p->flags = p->property = 0;   
+set_page_ref(p, 0);
+```
+
+​	重置了每个页的 `flags` 和 `property` 字段，并将页的引用计数设置为 0。这样可以确保这些页块处于未使用状态，准备重新分配。
+
+```
+if (base < page) {
+    list_add_before(le, &(base->page_link));
+    break;
+} else if (list_next(le) == &free_list) {
+    list_add(le, &(base->page_link));
+}
+```
+
+​	在链表中找到合适的位置，将页块 `base` 插入到链表中的正确位置。通过比较页的地址，确保空闲页链表按地址顺序排列。如果到达链表末尾且没有找到比 `base` 更大的页，则将 `base` 插入到链表尾部。
+
+#### 2.`best_fit_alloc_pages` 函数的修改
+
+```
+size_t min_size = nr_free + 1;
+while ((le = list_next(le)) != &free_list) {
+    struct Page *p = le2page(le, page_link);
+    if (p->property >= n && p->property < min_size) {
+        page = p;
+        min_size = p->property;
+    }
+}
+```
+
+​	通过遍历空闲页链表，寻找一个大小**等于或大于** `n` 且**最接近** `n` 的空闲页块。`min_size` 用于记录当前找到的最小可用页块大小，确保找到的页块尽可能地接近所需大小，从而减少内存浪费。
+
+#### 3.`best_fit_free_pages` 函数的修改
+
+```
+  base->property = n;
+  SetPageProperty(base);
+  nr_free += n;
+```
+
+​	设置该页块表示的连续页数为 `n`，标记该页块为属性页，增加空闲页总数 `nr_free`，反映新增加的空闲页块数量。
+
+```
+if (p + p->property == base) {
+    p->property += base->property;
+    ClearPageProperty(base);
+    list_del(&(base->page_link));
+    base = p;
+}
+```
+
+​	如果 `base` 与其前面的页块是相邻的，将 `base` 合并到前一个页块中，更新前一页块的 `property` 属性，并从链表中删除 `base`，因为它已经合并到前一个块中。
+
 ​	运行结果：
 
 ```
@@ -147,7 +203,15 @@ qemu pid=12573
 Total Score: 30/30
 ```
 
-## 扩展练习Challenge：硬件的可用物理内存范围的获取方法
+## 扩展练习Challenge：任意大小的内存单元slub分配算法（需要编程）
+
+slub算法，实现两层架构的高效内存单元分配，第一层是基于页大小的内存分配，第二层是在第一层基础上实现基于任意大小的内存分配。可简化实现，能够体现其主体思想即可。
+
+- 参考[linux的slub分配算法/](https://github.com/torvalds/linux/blob/master/mm/slub.c)，在ucore中实现slub分配算法。要求有比较充分的测试用例说明实现的正确性，需要有设计文档。
+
+### 此处见slab设计文档
+
+## 扩展练习Challenge：硬件的可用物理内存范围的获取方法（思考题）
 
 - 如果 OS 无法提前知道当前硬件的可用物理内存范围，请问你有何办法让 OS 获取可用物理内存范围？
 
