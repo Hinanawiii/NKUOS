@@ -1,0 +1,31 @@
+{
+    "files.associations": {
+        "signal.h": "c",
+        "list.h": "c",
+        "prefetch.h": "c",
+        "aio.h": "c",
+        "kernel_stat.h": "c",
+        "sched.h": "c",
+        "mount.h": "c",
+        "freezer.h": "c",
+        "kernel.h": "c",
+        "compiler.h": "c",
+        "kstrtox.h": "c",
+        "bitops.h": "c",
+        "typecheck.h": "c",
+        "bits.h": "c",
+        "debug_locks.h": "c",
+        "atomic.h": "c",
+        "cache.h": "c",
+        "types.h": "c",
+        "barrier.h": "c",
+        "cmpxchg.h": "c",
+        "alternative.h": "c",
+        "rmwcc.h": "c",
+        "compiler_types.h": "c",
+        "pmm.h": "c",
+        "memlayout.h": "c",
+        "defs.h": "c",
+        "stdio.h": "c"
+    }
+}

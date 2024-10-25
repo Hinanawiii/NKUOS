@@ -1,4 +1,4 @@
-#include <default_pmm.h>
+#include <best_fit_pmm.h>
 #include <best_fit_pmm.h>
 #include <defs.h>
 #include <error.h>
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <../sync/sync.h>
 #include <riscv.h>
+#include <slab.h>
 
 // virtual address of physical page array
 struct Page *pages;
@@ -123,19 +124,27 @@ void pmm_init(void) {
     // First we should init a physical memory manager(pmm) based on the framework.
     // Then pmm can alloc/free the physical memory.
     // Now the first_fit/best_fit/worst_fit/buddy_system pmm are available.
+    
     init_pmm_manager();
-
+    
     // detect physical memory space, reserve already used memory,
     // then use pmm->init_memmap to create free page list
     page_init();
-
+   
+    
+    //sbi_shutdown();
+    init_cache();
+    debug_print_slab_caches();
+    check();
+    
     // use pmm->check to verify the correctness of the alloc/free function in a pmm
     check_alloc_page();
-
+    //sbi_shutdown();
     extern char boot_page_table_sv39[];
     satp_virtual = (pte_t*)boot_page_table_sv39;
     satp_physical = PADDR(satp_virtual);
     cprintf("satp virtual address: 0x%016lx\nsatp physical address: 0x%016lx\n", satp_virtual, satp_physical);
+    
 }
 
 static void check_alloc_page(void) {

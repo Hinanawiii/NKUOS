@@ -42,7 +42,7 @@ struct trapframe {
     struct pushregs gpr;
     uintptr_t status;
     uintptr_t epc;
-    uintptr_t badvaddr;
+    uintptr_t stval;
     uintptr_t cause;
 };
 

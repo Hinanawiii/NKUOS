@@ -41,7 +41,7 @@ sed='sed'
 sym_table='obj/kernel.sym'
 
 ## gdb & gdbopts
-gdb="$(make_print GDB)"
+gdb="gdb-multiarch"
 gdbport='1234'
 
 gdb_in="$(make_print GRADE_GDB_IN)"
@@ -325,7 +325,7 @@ swapimg=$(make_print swapimg)
 
 ## set default qemu-options
 # qemuopts="-hda $osimg"
-qemuopts="-machine virt -nographic -bios default -device loader,file=bin/ucore.img,addr=0x80200000"
+qemuopts="-machine virt -nographic -bios default -kernel bin/ucore.img"
 ## set break-function, default is readline
 brkfun=readline
 

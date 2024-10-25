@@ -61,7 +61,7 @@ void print_trapframe(struct trapframe *tf) {
     print_regs(&tf->gpr);
     cprintf("  status   0x%08x\n", tf->status);
     cprintf("  epc      0x%08x\n", tf->epc);
-    cprintf("  badvaddr 0x%08x\n", tf->badvaddr);
+    cprintf("  badvaddr 0x%08x\n", tf->stval);
     cprintf("  cause    0x%08x\n", tf->cause);
 }
 

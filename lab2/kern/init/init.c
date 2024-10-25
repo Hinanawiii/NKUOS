@@ -8,10 +8,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <trap.h>
-
+#include <sbi.h>
 int kern_init(void) __attribute__((noreturn));
 void grade_backtrace(void);
-
+inline void sbi_shutdown(void)
+{
+	({ register uintptr_t a0 asm ("a0") = (uintptr_t)(0); register uintptr_t a1 asm ("a1") = (uintptr_t)(0); register uintptr_t a2 asm ("a2") = (uintptr_t)(0); register uintptr_t a7 asm ("a7") = (uintptr_t)(8); asm volatile ("ecall" : "+r" (a0) : "r" (a1), "r" (a2), "r" (a7) : "memory"); a0; });
+}
 
 int kern_init(void) {
     extern char edata[], end[];
@@ -24,20 +27,20 @@ int kern_init(void) {
     print_kerninfo();
 
     // grade_backtrace();
-    idt_init();  // init interrupt descriptor table
-
+    //idt_init();  // init interrupt descriptor table
+    
     pmm_init();  // init physical memory management
-
-    idt_init();  // init interrupt descriptor table
+    
+    //idt_init();  // init interrupt descriptor table
 
     clock_init();   // init clock interrupt
-    intr_enable();  // enable irq interrupt
+    //intr_enable();  // enable irq interrupt
 
-
-
+    
+    
     /* do nothing */
     while (1)
-        ;
+        sbi_shutdown();;
 }
 
 void __attribute__((noinline))

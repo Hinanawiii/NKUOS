@@ -23,7 +23,7 @@
 #include <defs.h>
 #include <atomic.h>
 #include <list.h>
-
+#include <slab.h>
 typedef uintptr_t pte_t;
 typedef uintptr_t pde_t;
 
@@ -37,6 +37,10 @@ struct Page {
     uint64_t flags;                 // array of flags that describe the status of the page frame
     unsigned int property;          // the num of free block, used in first fit pm manager
     list_entry_t page_link;         // free list link
+
+    //slab分配所需
+    int active;                     // slab已分配对象数量
+    struct obj_list_entry * freelist;   // slab的空闲链表
 };
 
 /* Flags describing the status of a page frame */
