@@ -376,4 +376,3 @@ quick_check 'check ticks'                                       \
 
 ## print final-score
 show_final
-
