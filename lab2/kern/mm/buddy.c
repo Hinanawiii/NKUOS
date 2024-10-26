@@ -38,7 +38,7 @@ static void buddy_init(void) {
     // 初始化空闲链表和空闲页面数
     list_init(&(free_list));
     nr_free = 0;
-    cprintf("Buddy system initialized.\n");
+
 }
 
 static bool stop_build = 0;
@@ -51,14 +51,12 @@ static void build_buddy_tree(size_t root, size_t full_tree_size, size_t real_tre
         return;
     }
 
-    cprintf("[DEBUG] Building buddy tree: root = %lu, full_tree_size = %lu, real_tree_size = %lu\n",
-           (unsigned long)root, (unsigned long)full_tree_size, (unsigned long)real_tree_size);
+;
 
     // 增加终止条件：full_tree_size 或 real_tree_size 为 0 时返回
     if (full_tree_size == 0 || real_tree_size == 0) {
         stop_build = 1;
-        cprintf("[DEBUG] Reached a leaf node with full_tree_size = %lu, real_tree_size = %lu, returning.\n",
-               (unsigned long)full_tree_size, (unsigned long)real_tree_size);
+
         return;
     }
 
@@ -77,13 +75,12 @@ static void build_buddy_tree(size_t root, size_t full_tree_size, size_t real_tre
     // 设置当前节点的属性
     record_area[root].property = full_tree_size;
     SetPageProperty(&record_area[root]);
-    cprintf("[DEBUG] Set property for root %lu, full_tree_size = %lu\n",
-           (unsigned long)root, (unsigned long)full_tree_size);
+
 
     // 假设在某个条件下我们需要停止整个构建过程，比如错误检测到
     if (full_tree_size == 0 || real_tree_size == 0) {
         stop_build = 1;
-        cprintf("[DEBUG] Setting stop_build to true at root %lu\n", (unsigned long)root);
+
     }
 }
 
@@ -93,14 +90,12 @@ static void build_buddy_tree(size_t root, size_t full_tree_size, size_t real_tre
 static void buddy_init_memmap(struct Page *base, size_t n) {
     // 1. 校验输入参数
     assert(n > 0);
-    cprintf("[DEBUG] buddy_init_memmap: Initializing %lu pages starting at %p\n", n, base);
 
     // 检查所有页面是否处于保留状态
     for (size_t i = 0; i < n; i++) {
         struct Page *page = base + i;
         assert(PageReserved(page));
     }
-    cprintf("[DEBUG] All pages are reserved, starting property initialization.\n");
 
     // 2. 初始化每个页面的属性
     for (size_t i = 0; i < n; i++) {
@@ -110,7 +105,6 @@ static void buddy_init_memmap(struct Page *base, size_t n) {
         page->ref = 0;
         SetPageProperty(page);
     }
-    cprintf("[DEBUG] All pages initialized with flags, property, and ref set to zero.\n");
 
     // 3. 计算全局参数
     size_t full_tree_size;
@@ -122,37 +116,32 @@ static void buddy_init_memmap(struct Page *base, size_t n) {
 
     size_t record_area_size = (full_tree_size * sizeof(struct Page)) / PGSIZE + 1;
     size_t real_tree_size = n - record_area_size;
-    cprintf("[DEBUG] Calculated full_tree_size: %lu, record_area_size: %lu, real_tree_size: %lu\n",
-           full_tree_size, record_area_size, real_tree_size);
+
 
     // 4. 检查是否需要调整树的大小
     while (n > full_tree_size + (record_area_size << 1)) {
         full_tree_size <<= 1; // 扩展树的大小，向上翻倍
         record_area_size = (full_tree_size * sizeof(struct Page)) / PGSIZE + 1;
         real_tree_size = n - record_area_size;
-        cprintf("[DEBUG] Adjusting tree size, new full_tree_size: %lu, record_area_size: %lu, real_tree_size: %lu\n",
-               full_tree_size, record_area_size, real_tree_size);
+
     }
 
     // 5. 初始化伙伴系统的区域
     physical_area = base;
     record_area = base + real_tree_size;
     allocate_area = physical_area;
-    cprintf("[DEBUG] physical_area: %p, record_area: %p, allocate_area: %p\n",
-           physical_area, record_area, allocate_area);
+
 
     // 6. 建立初始的伙伴树
     build_buddy_tree(TREE_ROOT, full_tree_size, real_tree_size, allocate_area, record_area);
-    cprintf("[DEBUG] Buddy tree initialized.\n");
+
 
     // 7. 将初始块加入到空闲列表中
     base->property = real_tree_size;
     list_add(&free_list, &(base->page_link));
     nr_free += real_tree_size;
-    cprintf("[DEBUG] Added initial block to free_list, real_tree_size: %lu, nr_free: %lu\n",
-           real_tree_size, nr_free);
 
-    cprintf("[DEBUG] buddy_init_memmap: Finished initialization for %lu pages.\n", n);
+
 }
 
 
@@ -271,7 +260,7 @@ static void buddy_free_pages(struct Page *base, size_t n) {
     list_add(&free_list, &record_area[block].page_link);
     nr_free += n;
 
-    cprintf("Freed %lu pages at index %lu with size %lu.\n", n, index, size);
+    
 }
 static size_t buddy_nr_free_pages(void) {
     return nr_free;
