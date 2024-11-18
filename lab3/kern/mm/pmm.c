@@ -270,7 +270,11 @@ pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     }
     return &((pte_t *)KADDR(PDE_ADDR(*pdep0)))[PTX(la)];
 }
-
+pte_t *get_has_pte(pde_t *pgdir, uintptr_t la) {
+    pde_t *pdep1 = &pgdir[PDX1(la)];
+    pde_t *pdep0 = &((pde_t *)KADDR(PDE_ADDR(*pdep1)))[PDX0(la)];
+    return &((pte_t *)KADDR(PDE_ADDR(*pdep0)))[PTX(la)];
+}
 // get_page - get related Page struct for linear address la using PDT pgdir
 struct Page *get_page(pde_t *pgdir, uintptr_t la, pte_t **ptep_store) {
     pte_t *ptep = get_pte(pgdir, la, 0);

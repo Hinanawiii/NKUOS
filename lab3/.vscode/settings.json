@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "chrono": "cpp",
+        "compare": "cpp",
+        "functional": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "swap_clock.h": "c",
+        "list.h": "c",
+        "swap_lru.h": "c",
+        "swap.h": "c",
+        "memlayout.h": "c"
+    }
+}
