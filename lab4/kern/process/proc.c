@@ -86,7 +86,7 @@ static struct proc_struct *
 alloc_proc(void) {
     struct proc_struct *proc = kmalloc(sizeof(struct proc_struct));
     if (proc != NULL) {
-    //LAB4:EXERCISE1 YOUR CODE 2212338
+    //LAB4:2211462
     /*
      * below fields in proc_struct need to be initialized
      *       enum proc_state state;                      // Process state
@@ -102,19 +102,18 @@ alloc_proc(void) {
      *       uint32_t flags;                             // Process flag
      *       char name[PROC_NAME_LEN + 1];               // Process name
      */
-    
-    proc->state=PROC_UNINIT;
-    proc->pid = -1;
-    proc->runs = 0;
-    proc->kstack =0;
-    proc->need_resched = 0;                              
-    proc->parent = NULL;                                 
-    proc->mm = NULL; 
-    memset(&(proc->context), 0, sizeof(struct context));  //上下文用这个解决
-    proc->tf = NULL;
-    proc->cr3 = boot_cr3; //实验手册给了
-    proc->flags = 0;
-    memset(proc->name, 0, PROC_NAME_LEN);
+        proc->state = PROC_UNINIT;                           // 设置进程状态为未初始化
+        proc->pid = -1;                                      // 设置进程ID为-1（还未分配）
+        proc->cr3 = boot_cr3;                                // 设置CR3寄存器的值（页目录基址）
+        proc->runs = 0;                                      // 设置进程运行次数为0
+        proc->kstack = 0;                                    // 设置内核栈地址为0（还未分配）
+        proc->need_resched = 0;                              // 设置不需要重新调度
+        proc->parent = NULL;                                 // 设置父进程为空
+        proc->mm = NULL;                                     // 设置内存管理字段为空
+        memset(&(proc->context), 0, sizeof(struct context)); // 初始化上下文信息为0
+        proc->tf = NULL;                                     // 设置trapframe为空
+        proc->flags = 0;                                     // 设置进程标志为0
+        memset(proc->name, 0, PROC_NAME_LEN);                // 初始化进程名为0
 
     }
     return proc;
@@ -136,6 +135,10 @@ get_proc_name(struct proc_struct *proc) {
 }
 
 // get_pid - alloc a unique pid for process
+/*
+next_safe 用于存储当前可以分配的最小未使用的 PID。
+last_pid 记录上一个生成的 PID。最初它被设置为 MAX_PID。
+*/
 static int
 get_pid(void) {
     static_assert(MAX_PID > MAX_PROCESS);
@@ -175,7 +178,7 @@ get_pid(void) {
 void
 proc_run(struct proc_struct *proc) {
     if (proc != current) {
-        // LAB4:EXERCISE3 YOUR CODE
+        // LAB4:2211462
         /*
         * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
         * MACROs or Functions:
@@ -184,17 +187,15 @@ proc_run(struct proc_struct *proc) {
         *   lcr3():                   Modify the value of CR3 register
         *   switch_to():              Context switching between two processes
         */
-       bool intr_flag;
-       struct proc_struct *prev = current, *next = proc; //记录
-
-        local_intr_save(intr_flag);// 中断管理
-        {
-            current = proc;
-            lcr3(next->cr3);
-            switch_to(&(prev->context), &(next->context));
-        }
-        // 恢复之前的中断状态
-        local_intr_restore(intr_flag);
+       struct proc_struct *prev = current, *next = proc;
+       bool success = 0;
+       local_intr_save(success);
+         {
+              current = proc;
+              lcr3(proc->cr3);
+              switch_to(&(prev->context), &(next->context));
+         }
+        local_intr_restore(success);
 
        
     }
@@ -297,7 +298,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         goto fork_out;
     }
     ret = -E_NO_MEM;
-    //LAB4:EXERCISE2 YOUR CODE
+    //LAB4:2211462
     /*
      * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
      * MACROs or Functions:
@@ -316,32 +317,25 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
      */
 
     //    1. call alloc_proc to allocate a proc_struct
+    //    2. call setup_kstack to allocate a kernel stack for child process
+    //    3. call copy_mm to dup OR share mm according clone_flag
+    //    4. call copy_thread to setup tf & context in proc_struct
+    //    5. insert proc_struct into hash_list && proc_list
+    //    6. call wakeup_proc to make the new child process RUNNABLE
+    //    7. set ret vaule using child proc's pid
     if ((proc = alloc_proc()) == NULL)
         goto fork_out;
-    //    2. call setup_kstack to allocate a kernel stack for child process
-    proc->parent = current; // 继承父进程
+    proc->parent = current;
     if (setup_kstack(proc))
         goto bad_fork_cleanup_kstack;
-    //    3. call copy_mm to dup OR share mm according clone_flag
     if (copy_mm(clone_flags, proc))
         goto bad_fork_cleanup_proc;
-    //    4. call copy_thread to setup tf & context in proc_struct
     copy_thread(proc, stack, tf);
-    //    5. insert proc_struct into hash_list && proc_list
-    bool intr_flag;
-    local_intr_save(intr_flag); //修正了一下，加入中断控制
-    {
-        proc->pid = get_pid();                    // 分配id
-        hash_proc(proc);                          
-        list_add(&proc_list, &(proc->list_link)); 
-    }
-    local_intr_restore(intr_flag);
-    //    6. call wakeup_proc to make the new child process RUNNABLE
+    proc->pid = get_pid();
+    hash_proc(proc);
+    list_add(&proc_list, &(proc->list_link));
     wakeup_proc(proc);
-    //    7. set ret vaule using child proc's pid
     ret = proc->pid;
-    
-
 fork_out:
     return ret;
 

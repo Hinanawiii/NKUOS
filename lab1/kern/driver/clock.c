@@ -5,7 +5,7 @@
 #include <riscv.h>
 
 volatile size_t ticks;
-
+/*获取 RISC-V 平台上的当前时间计数器值*/
 static inline uint64_t get_cycles(void) {
 #if __riscv_xlen == 64
     uint64_t n;
@@ -45,5 +45,5 @@ void clock_init(void) {
 
     cprintf("++ setup timer interrupts\n");
 }
-
+//getcycles也会存在误差
 void clock_set_next_event(void) { sbi_set_timer(get_cycles() + timebase); }

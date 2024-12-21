@@ -370,7 +370,7 @@ int copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end,
             assert(page != NULL);
             assert(npage != NULL);
             int ret = 0;
-            /* LAB5:2212338
+            /* LAB5:2211462
              * replicate content of page to npage, build the map of phy addr of
              * nage with the linear addr start
              *
@@ -388,11 +388,21 @@ int copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end,
              * (3) memory copy from src_kvaddr to dst_kvaddr, size is PGSIZE
              * (4) build the map of phy addr of  nage with the linear addr start
              */
-            uintptr_t src_kvaddr = page2kva(page);
-            uintptr_t dst_kvaddr = page2kva(npage);
-            memcpy((void *)dst_kvaddr, (void *)src_kvaddr, PGSIZE);
-            ret = page_insert(to, npage, start, perm);
-            assert(ret == 0);
+            if(share){
+                //cprintf("ref::%d\n",page->ref);
+                //page_ref_inc(page);
+                 //cprintf("ref::%d\n",page->ref);
+                //*ptep = pte_create(page2ppn(page), (~PTE_W) & perm);
+                page_insert(from, page, start, perm & (~PTE_W));
+                ret = page_insert(to, page, start, perm & (~PTE_W));
+                //*nptep = *ptep;
+            }else{
+                uintptr_t src_kvaddr = (uintptr_t)page2kva(page);
+                uintptr_t dst_kvaddr = (uintptr_t)page2kva(npage);
+                memcpy((void *)dst_kvaddr, (void *)src_kvaddr, PGSIZE);
+                ret = page_insert(to, npage, start, perm);
+                assert(ret == 0);
+            }
         }
         start += PGSIZE;
     } while (start != 0 && start < end);

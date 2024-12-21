@@ -201,7 +201,7 @@ dup_mmap(struct mm_struct *to, struct mm_struct *from) {
 
         insert_vma_struct(to, nvma);
 
-        bool share = 0;
+        bool share = 1;
         if (copy_range(to->pgdir, from->pgdir, vma->vm_start, vma->vm_end, share) != 0) {
             return -E_NO_MEM;
         }
@@ -395,6 +395,8 @@ volatile unsigned int pgfault_num=0;
  */
 int
 do_pgfault(struct mm_struct *mm, uint_t error_code, uintptr_t addr) {
+    bool intr_flag = 0;
+    local_intr_save(intr_flag);//关闭中断
     int ret = -E_INVAL;
     //try to find a vma which include addr
     struct vma_struct *vma = find_vma(mm, addr);
@@ -449,7 +451,7 @@ do_pgfault(struct mm_struct *mm, uint_t error_code, uintptr_t addr) {
             goto failed;
         }
     } else {
-        /*LAB3 EXERCISE 3: 2212338
+        /*LAB3 EXERCISE 3: 2211462
         * 请你根据以下信息提示，补充函数
         * 现在我们认为pte是一个交换条目，那我们应该从磁盘加载数据并放到带有phy addr的页面，
         * 并将phy addr与逻辑addr映射，触发交换管理器记录该页面的访问情况
@@ -461,31 +463,62 @@ do_pgfault(struct mm_struct *mm, uint_t error_code, uintptr_t addr) {
         *    page_insert ： 建立一个Page的phy addr与线性addr la的映射
         *    swap_map_swappable ： 设置页面可交换
         */
-        if (swap_init_ok) {
-            struct Page *page = NULL;
-            // 你要编写的内容在这里，请基于上文说明以及下文的英文注释完成代码编写
-            //(1）According to the mm AND addr, try
-            //to load the content of right disk page
-            //into the memory which page managed.
-            //(2) According to the mm,
-            //addr AND page, setup the
-            //map of phy addr <--->
-            //logical addr
-            //(3) make the page swappable.
-            swap_in(mm, addr, &page);  
-            page_insert(mm->pgdir, page, addr, perm);
-            swap_map_swappable(mm, addr, page, 1);
-            page->pra_vaddr = addr;
-        } else {
-            cprintf("no swap_init_ok but ptep is %x, failed\n", *ptep);
-            goto failed;
+       
+       if (*ptep & PTE_V) {
+            
+            assert((*ptep & PTE_W) == 0);//不可写引起的缺页
+            struct Page *page = pa2page(PTE_ADDR(*ptep));  // 获取物理页
+            //cprintf("start cow,page ref :%d\n",page->ref);
+            // 2. 检查引用计数，判断是否需要复制
+            if (page_ref(page) > 1) {
+                //cprintf("REF > 1\n");
+                perm = *ptep & 0xff; //获得权限
+                // struct Page *new_page = alloc_page();  // 分配新物理页
+                struct Page* new_page = pgdir_alloc_page(mm->pgdir, addr, perm|PTE_W);
+                if (new_page == NULL) {
+                    cprintf("cow alloc page failed\n");
+                    goto failed;
+                }
+                // 3. 复制内存内容
+                void *kva_src = page2kva(page);
+                void *kva_dst = page2kva(new_page); 
+                memcpy(kva_dst, kva_src, PGSIZE);
+                // 4. 减少原页面引用计数
+                page_ref_dec(page);
+                return 0;
+            }
+            // 如果引用计数为1，直接修改权限
+            else {
+                *ptep |= PTE_W | PTE_R;
+                return 0;
+            }
+        }else{
+            if (swap_init_ok) {
+                struct Page *page = NULL;
+                // 你要编写的内容在这里，请基于上文说明以及下文的英文注释完成代码编写
+                //(1）According to the mm AND addr, try
+                //to load the content of right disk page
+                //into the memory which page managed.
+                //(2) According to the mm,
+                //addr AND page, setup the
+                //map of phy addr <--->
+                //logical addr
+                //(3) make the page swappable.
+                swap_in(mm, addr, &page);  
+                page_insert(mm->pgdir, page, addr, perm);
+                swap_map_swappable(mm, addr, page, 1);
+                page->pra_vaddr = addr;
+            } else {
+                cprintf("no swap_init_ok but ptep is %x, failed\n", *ptep);
+                goto failed;
+            }
         }
    }
-
+    local_intr_restore(intr_flag);
    ret = 0;
 failed:
     return ret;
-}
+}   
 
 
 bool

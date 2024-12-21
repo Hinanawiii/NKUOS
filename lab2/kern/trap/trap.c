@@ -22,7 +22,7 @@ static void print_ticks() {
 /* idt_init - initialize IDT to each of the entry points in kern/trap/vectors.S
  */
 void idt_init(void) {
-    /* LAB1 YOUR CODE : STEP 2 *///你说的都是我的词啊？
+    /* LAB1 YOUR CODE : STEP 2 */
     /* (1) Where are the entry addrs of each Interrupt Service Routine (ISR)?
      *     All ISR's entry addrs are stored in __vectors. where is uintptr_t
      * __vectors[] ?
@@ -61,7 +61,7 @@ void print_trapframe(struct trapframe *tf) {
     print_regs(&tf->gpr);
     cprintf("  status   0x%08x\n", tf->status);
     cprintf("  epc      0x%08x\n", tf->epc);
-    cprintf("  badvaddr 0x%08x\n", tf->badvaddr);
+    cprintf("  badvaddr 0x%08x\n", tf->stval);
     cprintf("  cause    0x%08x\n", tf->cause);
 }
 

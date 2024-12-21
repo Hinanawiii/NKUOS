@@ -6,11 +6,11 @@ SLASH	:= /
 V       := @
 
 #ifndef GCCPREFIX
-GCCPREFIX := riscv64-unknown-elf-
+GCCPREFIX := /opt/riscv/bin/riscv64-unknown-linux-gnu-
 #endif
 
 ifndef QEMU
-QEMU := qemu-system-riscv64
+QEMU := sudo qemu-system-riscv64
 endif
 
 ifndef SPIKE
@@ -163,11 +163,14 @@ TARGETS: $(TARGETS)
 .DEFAULT_GOAL := TARGETS
 .PHONY: qemu spike test
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+#	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
 	$(V)$(QEMU) \
 		-machine virt \
 		-nographic \
 		-bios default \
-		-device loader,file=$(UCOREIMG),addr=0x80200000
+		-kernel $(UCOREIMG)\
+		-s -S 
+# -device loader,file=$(UCOREIMG),addr=0x80200000
 
 debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(QEMU) \

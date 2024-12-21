@@ -27,8 +27,16 @@ int kern_init(void) {
     // grade_backtrace();
 
     idt_init();  // init interrupt descriptor table
-
+    /*void (*invalid_function)() = (void (*)())0x80200003;
+    invalid_function();
+ 
+    __asm__ volatile("Lb: .global Lb");
+Lb:   __asm__ volatile (
+        "EBREAK\n"
+    );
     // rdtime in mbare mode crashes
+    __asm__ volatile("L1: .global L1");*/
+L1:
     clock_init();  // init clock interrupt
 
     intr_enable();  // enable irq interrupt
@@ -36,6 +44,7 @@ int kern_init(void) {
     while (1)
         ;
 }
+
 
 void __attribute__((noinline))
 grade_backtrace2(unsigned long long arg0, unsigned long long arg1, unsigned long long arg2, unsigned long long arg3) {

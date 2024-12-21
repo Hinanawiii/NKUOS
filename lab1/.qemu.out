@@ -1,5 +1,5 @@
 
-OpenSBI v0.4 (Jul  2 2019 11:53:53)
+OpenSBI v0.9
    ____                    _____ ____ _____
   / __ \                  / ____|  _ \_   _|
  | |  | |_ __   ___ _ __ | (___ | |_) || |
@@ -9,24 +9,42 @@ OpenSBI v0.4 (Jul  2 2019 11:53:53)
         | |
         |_|
 
-Platform Name          : QEMU Virt Machine
-Platform HART Features : RV64ACDFIMSU
-Platform Max HARTs     : 8
-Current Hart           : 0
-Firmware Base          : 0x80000000
-Firmware Size          : 112 KB
-Runtime SBI Version    : 0.1
+Platform Name             : riscv-virtio,qemu
+Platform Features         : timer,mfdeleg
+Platform HART Count       : 1
+Firmware Base             : 0x80000000
+Firmware Size             : 100 KB
+Runtime SBI Version       : 0.2
 
-PMP0: 0x0000000080000000-0x000000008001ffff (A)
-PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000080000000-0x000000008001ffff ()
+Domain0 Region01          : 0x0000000000000000-0xffffffffffffffff (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000087000000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART ISA             : rv64imafdcsu
+Boot HART Features        : scounteren,mcounteren,time
+Boot HART PMP Count       : 16
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
 (THU.CST) os is loading ...
 
 
 Special kernel symbols:
   entry  0x000000008020000a (virtual)
-  etext  0x0000000080200b10 (virtual)
+  etext  0x0000000080200a8a (virtual)
   edata  0x0000000080204010 (virtual)
-  end    0x0000000080204020 (virtual)
+  end    0x0000000080204030 (virtual)
 Kernel executable memory footprint: 17KB
 ++ setup timer interrupts
 100 ticks

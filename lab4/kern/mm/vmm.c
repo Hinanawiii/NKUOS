@@ -318,7 +318,7 @@ volatile unsigned int pgfault_num=0;
  *            or supervisor mode (0) at the time of the exception.
  */
 int
-do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
+do_pgfault(struct mm_struct *mm, uint_t error_code, uintptr_t addr) {
     int ret = -E_INVAL;
     //try to find a vma which include addr
     struct vma_struct *vma = find_vma(mm, addr);
@@ -373,7 +373,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
             goto failed;
         }
     } else {
-        /*LAB3 EXERCISE 3: 2212338
+        /*LAB3 EXERCISE 3: 2211462
         * 请你根据以下信息提示，补充函数
         * 现在我们认为pte是一个交换条目，那我们应该从磁盘加载数据并放到带有phy addr的页面，
         * 并将phy addr与逻辑addr映射，触发交换管理器记录该页面的访问情况
@@ -410,4 +410,5 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
 failed:
     return ret;
 }
+
 

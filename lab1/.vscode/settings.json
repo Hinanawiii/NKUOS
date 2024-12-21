@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "riscv.h": "c",
+        "stdio.h": "c",
+        "sbi.h": "c"
+    }
+}

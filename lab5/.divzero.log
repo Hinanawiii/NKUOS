@@ -1,5 +1,5 @@
 
-OpenSBI v0.4 (Jul  2 2019 11:53:53)
+OpenSBI v0.9
    ____                    _____ ____ _____
   / __ \                  / ____|  _ \_   _|
  | |  | |_ __   ___ _ __ | (___ | |_) || |
@@ -9,24 +9,42 @@ OpenSBI v0.4 (Jul  2 2019 11:53:53)
         | |
         |_|
 
-Platform Name          : QEMU Virt Machine
-Platform HART Features : RV64ACDFIMSU
-Platform Max HARTs     : 8
-Current Hart           : 0
-Firmware Base          : 0x80000000
-Firmware Size          : 112 KB
-Runtime SBI Version    : 0.1
+Platform Name             : riscv-virtio,qemu
+Platform Features         : timer,mfdeleg
+Platform HART Count       : 1
+Firmware Base             : 0x80000000
+Firmware Size             : 100 KB
+Runtime SBI Version       : 0.2
 
-PMP0: 0x0000000080000000-0x000000008001ffff (A)
-PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000080000000-0x000000008001ffff ()
+Domain0 Region01          : 0x0000000000000000-0xffffffffffffffff (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000087000000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART ISA             : rv64imafdcsu
+Boot HART Features        : scounteren,mcounteren,time
+Boot HART PMP Count       : 16
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
 (THU.CST) os is loading ...
 
 Special kernel symbols:
   entry  0xc0200032 (virtual)
-  etext  0xc020657c (virtual)
-  edata  0xc02a7550 (virtual)
-  end    0xc02b2aac (virtual)
-Kernel executable memory footprint: 715KB
+  etext  0xc020675c (virtual)
+  edata  0xc02b5b98 (virtual)
+  end    0xc02c10f4 (virtual)
+Kernel executable memory footprint: 773KB
 memory management: default_pmm_manager
 physcial memory map:
   memory: 0x07e00000, [0x80200000, 0x87ffffff].
@@ -42,7 +60,7 @@ page fault at 0x00000100: K/W
 check_pgfault() succeeded!
 check_vmm() succeeded.
 SWAP: manager = fifo swap manager
-BEGIN check_swap: count 1, total 31561
+BEGIN check_swap: count 1, total 31546
 setup Page Table for vaddr 0X1000, so alloc a page
 setup Page Table vaddr 0~4MB OVER!
 set up init env for check_swap begin!
@@ -104,6 +122,6 @@ user panic at user/divzero.c:9:
 
 all user-mode processes have quit.
 init check memory pass.
-kernel panic at kern/process/proc.c:464:
+kernel panic at kern/process/proc.c:465:
     initproc exit.
 

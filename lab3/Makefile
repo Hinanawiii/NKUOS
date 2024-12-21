@@ -6,7 +6,7 @@ SLASH	:= /
 V       := @
 
 #ifndef GCCPREFIX
-GCCPREFIX := riscv64-unknown-elf-
+GCCPREFIX := riscv64-unknown-linux-gnu-
 #endif
 
 ifndef QEMU

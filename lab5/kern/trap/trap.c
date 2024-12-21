@@ -97,11 +97,11 @@ static inline void print_pgfault(struct trapframe *tf) {
 }
 
 static int
-// trap.c 中的 pgfault_handler 函数
 pgfault_handler(struct trapframe *tf) {
     extern struct mm_struct *check_mm_struct;
-    print_pgfault(tf);  // 添加这行来打印更多信息
-    
+    if(check_mm_struct !=NULL) { //used for test check_swap
+            print_pgfault(tf);
+        }
     struct mm_struct *mm;
     if (check_mm_struct != NULL) {
         assert(current == idleproc);
@@ -110,6 +110,7 @@ pgfault_handler(struct trapframe *tf) {
     else {
         if (current == NULL) {
             print_trapframe(tf);
+            print_pgfault(tf);
             panic("unhandled page fault.\n");
         }
         mm = current->mm;

@@ -6,7 +6,7 @@ SLASH	:= /
 V       := @
 
 #ifndef GCCPREFIX
-GCCPREFIX := riscv64-unknown-elf-
+GCCPREFIX := riscv64-unknown-linux-gnu-
 #endif
 
 ifndef QEMU
@@ -131,7 +131,7 @@ UCOREIMG	:= $(call totarget,ucore.img)
 
 
 $(UCOREIMG): $(kernel)
-	$(OBJCOPY) $(kernel) --strip-all -O binary $@
+	$(OBJCOPY) $(kernel) -O binary $@
 
 $(call create_target,ucore.img)
 
@@ -163,7 +163,8 @@ qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-machine virt \
 		-nographic \
 		-bios default \
-		-device loader,file=$(UCOREIMG),addr=0x80200000
+		-kernel $(UCOREIMG)
+##		-device loader,file=$(UCOREIMG),addr=0x80200000
 
 debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(QEMU) \
@@ -174,10 +175,10 @@ debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-s -S
 
 gdb:
-	riscv64-unknown-elf-gdb \
+	gdb-multiarch \
     -ex 'file bin/kernel' \
     -ex 'set arch riscv:rv64' \
-    -ex 'target remote localhost:1234'
+    -ex 'target remote localhost:12345'
 
 	
 .PHONY: grade touch

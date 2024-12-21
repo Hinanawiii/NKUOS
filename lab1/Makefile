@@ -5,10 +5,10 @@ SLASH	:= /
 
 V       := @
 
-GCCPREFIX := riscv64-unknown-elf-
+GCCPREFIX := riscv64-unknown-linux-gnu-
 
 ifndef QEMU
-QEMU := qemu-system-riscv64
+QEMU :=sudo qemu-system-riscv64
 endif
 
 ifndef SPIKE
@@ -166,9 +166,10 @@ qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-machine virt \
 		-nographic \
 		-bios default \
-		-kernel $(UCOREIMG)
-#		-device loader,file=$(UCOREIMG),addr=0x80200000
-
+		-kernel $(UCOREIMG)\
+		-gdb tcp::12345
+#       -device loader,file=$(UCOREIMG),addr=0x80200000
+# -machine virt sifive_u
 debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(QEMU) \
 		-machine virt \
@@ -178,7 +179,7 @@ debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-s -S
 
 gdb:
-	riscv64-unknown-elf-gdb \
+	gdb \
     -ex 'file bin/kernel' \
     -ex 'set arch riscv:rv64' \
     -ex 'target remote localhost:1234'

@@ -87,7 +87,7 @@ static struct proc_struct *
 alloc_proc(void) {
     struct proc_struct *proc = kmalloc(sizeof(struct proc_struct));
     if (proc != NULL) {
-    //LAB4:2212338
+    //LAB4:2211462
     /*
      * below fields in proc_struct need to be initialized
      *       enum proc_state state;                      // Process state
@@ -115,9 +115,6 @@ alloc_proc(void) {
         proc->tf = NULL;                                     // 设置trapframe为空
         proc->flags = 0;                                     // 设置进程标志为0
         memset(proc->name, 0, PROC_NAME_LEN);                // 初始化进程名为0
-        proc->cptr = NULL; // Child Pointer 表示当前进程的子进程
-        proc->optr = NULL; // Older Sibling Pointer 表示当前进程的上一个兄弟进程
-        proc->yptr = NULL; // Younger Sibling Pointer 表示当前进程的下一个兄弟进程
 
     }
     return proc;
@@ -206,7 +203,7 @@ get_pid(void) {
 void
 proc_run(struct proc_struct *proc) {
     if (proc != current) {
-        // LAB4:EXERCISE3 2212338
+        // LAB4:EXERCISE3 2211462
         /*
         * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
         * MACROs or Functions:
@@ -387,7 +384,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         goto fork_out;
     }
     ret = -E_NO_MEM;
-    //LAB4:EXERCISE2 2212338
+    //LAB4:EXERCISE2 2211462
     /*
      * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
      * MACROs or Functions:
@@ -430,18 +427,12 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     if (copy_mm(clone_flags, proc))
         goto bad_fork_cleanup_proc;
     copy_thread(proc, stack, tf);
-    bool intr_flag;
-    local_intr_save(intr_flag);
-    {
-        proc->pid = get_pid(); // 为新进程分配PID
-        hash_proc(proc); // 将新进程添加到哈希表中
-        set_links(proc); // 设置进程间的链接关系
-    }
-    local_intr_restore(intr_flag);
-    wakeup_proc(proc); 
-    ret = proc->pid; 
-
-fork_out: // 正常返回
+    proc->pid = get_pid();
+    hash_proc(proc);
+    list_add(&proc_list, &(proc->list_link));
+    wakeup_proc(proc);
+    ret = proc->pid;
+fork_out:
     return ret;
 
 bad_fork_cleanup_kstack:
@@ -632,7 +623,7 @@ load_icode(unsigned char *binary, size_t size) {
     // Keep sstatus
     uintptr_t sstatus = tf->status;
     memset(tf, 0, sizeof(struct trapframe));
-    /* LAB5:EXERCISE1 2212338
+    /* LAB5:EXERCISE1 2211462
      * should set tf->gpr.sp, tf->epc, tf->status
      * NOTICE: If we set trapframe correctly, then the user level process can return to USER MODE from kernel. So
      *          tf->gpr.sp should be user stack top (the value of sp)
@@ -833,7 +824,10 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(exit);
+    //KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
+    //KERNEL_EXECVE(exit);
+    KERNEL_EXECVE(divzero);
+    //cprintf("user_main execve ok.\n");
 #endif
     panic("user_main execve failed.\n");
 }
